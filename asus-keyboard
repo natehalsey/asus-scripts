@@ -1,0 +1,21 @@
+#!/bin/sh
+kb_path="/sys/class/leds/asus::kbd_backlight/brightness"
+
+current_brightness=$(cat $kb_path)
+
+case $1 in
+	up)
+		if [[ $current_brightness -lt 3 ]]; then
+			echo $(expr $current_brightness + 1) > $kb_path
+		fi
+		;;
+	down)	
+		if [[ $current_brightness -gt 0 ]]; then
+			echo $(expr $current_brightness - 1) > $kb_path
+		else
+			echo 0 > $kb_path
+		fi
+		;;
+	*)
+		;;
+esac

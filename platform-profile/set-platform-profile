@@ -1,0 +1,54 @@
+#!/bin/sh
+opt=$1
+
+get_profile(){
+	local profile=$(cat /sys/firmware/acpi/platform_profile)
+	echo $profile
+
+}
+
+get_profile_num(){
+	local profile=$(get_profile)
+	local profile_num
+	case $profile in                                                                                       
+	        balanced)            
+	                profile_num=0
+	                ;;           
+	        performance)         
+	                profile_num=1
+	                ;;           
+	        quiet)               
+	                profile_num=2
+	                ;;
+	esac
+	echo $profile_num
+
+}
+
+set_profile(){
+	local new_profile=$1
+	echo $new_profile > /sys/devices/platform/asus-nb-wmi/throttle_thermal_policy 
+}
+
+cycle_profile(){
+	local current_profile=$(get_profile_num)
+	new_profile=$((($current_profile + 1) % 3))
+	set_profile "$new_profile"
+}
+
+case $opt in
+	cycle)
+		`cycle_profile`
+		;;
+	^[0-3])
+		set_profile "$1"
+		;;
+	get)
+		echo $(get_profile)
+		;;
+	*)
+		echo "Unsupported opt."
+		;;
+esac
+
+

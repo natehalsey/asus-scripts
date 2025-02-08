@@ -1,0 +1,45 @@
+#!/bin/bash
+
+get_sink_volume() { 
+	echo $(pactl get-sink-volume @DEFAULT_SINK@ | tr '\n' ' ' | awk '{printf $5}' | sed "s/%//")
+}
+
+increase_sink_volume() {
+	curr_vol=$(get_sink_volume)
+	new_vol=$(expr $curr_vol + $vol_incr)
+	
+	if [[ $new_vol -gt 100 ]]; then
+		new_vol=100
+	
+	elif [[ $curr_vol -eq $new_vol ]]; then
+		return 0
+	fi
+	
+	pactl set-sink-volume @DEFAULT_SINK@ $new_vol%
+}
+
+decrease_sink_volume() {
+	pactl set-sink-volume @DEFAULT_SINK@ -$vol_incr%
+}
+
+toggle_sink_mute() {
+	pactl set-sink-mute @DEFAULT_SINK@ toggle
+}
+
+vol_incr=5
+
+case $1 in
+	up)
+		$(increase_sink_volume)
+		;;
+	down)
+		$(decrease_sink_volume)
+		;;
+	mute)
+		$(toggle_sink_mute)		
+		;;
+	*)
+		;;
+esac
+
+
